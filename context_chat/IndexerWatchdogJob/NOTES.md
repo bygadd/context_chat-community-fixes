@@ -52,3 +52,6 @@ as every other live context_chat patch. ⇒ Re-apply after any context_chat app 
 3. Verify: next cron → IndexerJobs revived → queue drains → `last_indexed_time` latches.
 
 Source files: see this directory (`lib/`, `tests/`, `info.xml.diff`).
+
+## Upstream issue (the SchedulerJob re-seed question on main)
+https://github.com/nextcloud/context_chat/issues/244 (opened 2026-06-11, issue-first; awaiting maintainer triage before any PR).
