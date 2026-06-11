@@ -8,7 +8,7 @@ final, bug-free version. Two upstream targets:
 | Patch | Status | GLPI | Dir |
 |---|---|---|---|
 | SMB `fopen` non-seekable → unconditional `CachingStream` (LangRopeService) | live (Yoan-applied) | #35096 / Change #93 | `context_chat/smb-seek/` |
-| Indexing-job self-heal (`EnsureIndexingJobsStep`, `<post-migration>`) | this plan | #35096 | `context_chat/EnsureIndexingJobsStep/` |
+| Indexing-job self-heal (`IndexerWatchdogJob` TimedJob + `insertIntoQueue` fix) | local clone | #35096 | `context_chat/IndexerWatchdogJob/` |
 
 ## nextcloud/context_chat_backend (Python)
 | Patch | Status | GLPI | Doc |

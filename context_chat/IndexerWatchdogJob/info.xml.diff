@@ -1,0 +1,21 @@
+diff --git a/appinfo/info.xml b/appinfo/info.xml
+index 32bca40..5bc69b4 100644
+--- a/appinfo/info.xml
++++ b/appinfo/info.xml
+@@ -46,6 +46,7 @@ Refer to the [Context Chat Backend's readme](https://github.com/nextcloud/contex
+ 		<job>OCA\ContextChat\BackgroundJobs\FileSystemListenerJob</job>
+ 		<job>OCA\ContextChat\BackgroundJobs\ActionJob</job>
+ 		<job>OCA\ContextChat\BackgroundJobs\RotateLogsJob</job>
++		<job>OCA\ContextChat\BackgroundJobs\IndexerWatchdogJob</job>
+ 	</background-jobs>
+ 	<commands>
+ 		<command>OCA\ContextChat\Command\Prompt</command>
+@@ -57,7 +58,7 @@ Refer to the [Context Chat Backend's readme](https://github.com/nextcloud/contex
+         <install>
+             <step>OCA\ContextChat\Repair\AppInstallStep</step>
+         </install>
+-    </repair-steps>
++        </repair-steps>
+ 
+     <settings>
+         <admin>OCA\ContextChat\Settings\AdminSettings</admin>

@@ -1,0 +1,21 @@
+diff --git a/lib/Service/QueueService.php b/lib/Service/QueueService.php
+index b8abf81..4533d85 100644
+--- a/lib/Service/QueueService.php
++++ b/lib/Service/QueueService.php
+@@ -27,12 +27,11 @@ class QueueService {
+ 	 * @throws \OCP\DB\Exception
+ 	 */
+ 	public function insertIntoQueue(QueueFile $file): void {
+-		// Only add to queue if it's not in there already
+-		if ($this->queueMapper->existsQueueItem($file)) {
+-			return;
++		// Only INSERT if the file is not already in the queue; but always ensure
++		// a consumer job exists regardless — scheduleJob() is idempotent (uses has()).
++		if (!$this->queueMapper->existsQueueItem($file)) {
++			$this->queueMapper->insertIntoQueue($file);
+ 		}
+-
+-		$this->queueMapper->insertIntoQueue($file);
+ 		$this->scheduleJob($file);
+ 	}
+ 
