@@ -17,6 +17,7 @@ final, bug-free version. Two upstream targets:
 | fork-deadlock freeze fix | live | #34981 | `docs/context_chat_fork_deadlock_2026-06-07.md` |
 | recv-leak / lease fix (+test) | live | #34981 | `docs/context_chat_recv_leak_lease_2026-06-07.md` |
 | child-log relay (ccb.log) | live | #34981 | (in recv_leak_lease doc) |
+| HNSW selective-context fix (0 results) | **pending** | #35318 | `docs/context_chat_hnsw_selective_context_2026-06-12.md` |
 
 NOT part of this contribution: the NC-core worker dedup fix lives in `nextcloud/server`
 (repo `nc-worker-resilience`, already PR'd separately).
