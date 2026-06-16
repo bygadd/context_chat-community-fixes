@@ -33,7 +33,7 @@ this is a sender bug, exposed by (correctly) strict parsing.
 
 ## Evidence (this deployment)
 - First failure **2026-06-06 01:22:40 UTC**, exactly when `SubmitContentJob` reached
-  `oc_context_chat_content_queue` id **281719**, title `"... Регистрант Податоци[мк]\r"`
+  `oc_context_chat_content_queue` id **281719**, title `"... <subject>\r"`
   (a domain-registrar mail; courier mails with a trailing `\n` are also present — 5 CR + 16 LF titles found).
 - **No** backend restart / config / version change at that moment — the same uvicorn worker
   served `200` at 01:22:37 and `400` at 01:22:40. Pure data trigger (the queue simply reached

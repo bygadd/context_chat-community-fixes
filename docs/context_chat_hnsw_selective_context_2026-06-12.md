@@ -8,9 +8,9 @@ who have more than ~5500 indexed chunks. Users with small corpora are unaffected
 
 ## Environment
 
-- `context_chat_backend` 5.3.0, Python 3.11, NC33 host `the host`
+- `context_chat_backend` 5.3.0, Python 3.11, Nextcloud 33
 - Docker `nc_app_context_chat_backend` (network=host, uvicorn 127.0.0.1:23004)
-- PostgreSQL 17.5 + pgvector (older build: no `hnsw.ef_search` GUC, no iterative index scan)
+- PostgreSQL 17.5 + pgvector 0.8.0, HNSW index
 - HNSW index on `langchain_pg_embedding.embedding vector(1024)` with `vector_cosine_ops`
 - Total: ~7.9M embeddings (single collection, uuid `<uuid>`)
 - **`/dev/shm` = 64MB**, **`work_mem` = 4MB** — both matter for the fix (see below)
@@ -42,8 +42,11 @@ Confirmed by `EXPLAIN` bisect on prod: 5500 items = `Sort` (works); 5600 =
 (`PG_BATCH_SIZE=50000`) makes large users *probabilistic*: each 50k batch triggers HNSW,
 so a user only gets results when some batch happens to contain HNSW-found global ids.
 
-`hnsw.ef_search` tuning was ruled out: this pgvector build does not expose the GUC.
-The fix must live in application code.
+I initially dismissed `hnsw.ef_search` / `hnsw.iterative_scan` because `SHOW` reported them as
+unknown — but pgvector only registers those GUCs once its shared library is loaded into the
+session (after the first vector operation), so a fresh-session `SHOW` is misleading. They are in
+fact available here (pgvector 0.8.0; see *Long-term*). I kept the application-level CTE as the
+validated fix because it is exact and plan-fenced; the native GUC is the lighter alternative.
 
 ## Fix (`# CCB-PATCH-hnsw-selective`)
 
@@ -165,6 +168,9 @@ nc_app_context_chat_backend`. **All live container patches are lost on
 
 ## Long-term
 
-The principled fix for fast *and* exact filtered-KNN on huge users is **pgvector ≥ 0.8.0
-iterative index scans** (HNSW keeps scanning until enough filtered rows are found). That is
-an infra upgrade (Yoan's call); the CTE is the immediate application-level remedy.
+This deployment is already on pgvector 0.8.0, which ships **iterative index scans**
+(`SET hnsw.iterative_scan = relaxed_order` — HNSW keeps scanning until enough rows pass the
+id-filter); it is `off` by default here. That is the pgvector-native remedy for exactly this
+filtered-KNN under-return and is worth enabling and measuring. I kept the CTE as the
+application-level fix because it is exact and deterministic even for a very sparse user; the
+two are complementary.

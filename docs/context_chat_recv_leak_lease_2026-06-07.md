@@ -52,7 +52,6 @@ The three freeze patches live in the container's writable layer. After ANY backe
 - **Backups (this fix):** `utils.py.ccb-bak-recv` (TRUE original, pre-any-patch this fix), `utils.py.ccb-bak-lease` (post-recv/pre-lease), `controller.py.ccb-bak-lease`. To fully revert THIS fix, restore the `.ccb-bak-recv`/`.ccb-bak-lease` originals; do NOT restore them as "the fix".
 - **Post-re-apply check:** `python3 /app/test_ccb_lease_recv.py` → 5/5 PASS; then restart; then watch ccb.log for `Currently indexing` cycling + `loadSources 200` + no 503-only-storm. Forkserver children don't log to `docker logs`; monitor via ccb.log + the pgvector `docs` count.
 
-##Work-ticket (context_chat umbrella). **Problem #678** (recv-leak root cause) + **** (this patch), both with requester Group "AI Team" #171 + assignee Yoan #8 + ITIL category (P→40 "Проблем > Софтуер", C→31 "Услуга > Инсталиране на софтуер"). Links: Problem↔ (856), Change↔ (14), Change↔Problem (7). Design/diagnostic Task (executor Yoan #8).
 
 ## Upstream
 Both components are general (the missing `cconn.close()` + unbounded `recv()` is a real upstream bug; a lock-lease is a standard robustness pattern). File a PR to `nextcloud/context_chat_backend` after a confirmed stability window, alongside the multipart + fork-deadlock issues.
