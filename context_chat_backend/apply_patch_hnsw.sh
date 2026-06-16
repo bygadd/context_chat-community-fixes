@@ -4,7 +4,7 @@
 # File: /app/context_chat_backend/vectordb/pgvector.py
 # Re-apply after every: app_api:app:update context_chat_backend
 #
-# Fixes GLPI #35318: Selective Context returns 0 documents for users with >~5500 chunks.
+# Fixes: Selective Context returns 0 documents for users with >~5500 chunks.
 # Root cause: PostgreSQL flips the similarity ORDER BY to an HNSW Index Scan at ~5500
 # IN-list items, then post-filters by id → 0 surviving candidates for users whose chunks
 # are a small fraction of the collection.

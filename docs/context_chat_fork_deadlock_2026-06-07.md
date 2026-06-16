@@ -36,4 +36,4 @@
 - Restarting the backend clears stuck children — **temporary** (recurs).
 - The `join(timeout)`+`kill` change alone (defense-in-depth, no start-method refactor) turns the permanent freeze into a self-recovering, time-bounded blip.
 
-_Filed by the Videnov AI Team after a production freeze; happy to submit the PR._
+_Filed after a production freeze; happy to submit the PR._

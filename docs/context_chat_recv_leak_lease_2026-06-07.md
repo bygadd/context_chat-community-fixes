@@ -4,7 +4,7 @@
 After the fork-deadlock fix (`forkserver` + `join(timeout=900)`), a **residual** permanent freeze remained: ~20 mail sources stuck in the process-global `_indexing` map (unchanging), `PUT /loadSources` returning `503 "... already being processed"` indefinitely, **no embedding child alive**, only a restart clearing it. Root cause: `exec_in_proc` (`context_chat_backend/utils.py`) passes the worker pipe's write-end (`cconn`) to the child but the **parent never closes its own copy** after `p.start()`. If the child dies WITHOUT sending a result (OOM-kill/segfault, or `exception_wrap`'s `resconn.send(...)` raises on a **non-picklable exception**), `pconn.recv()` blocks **forever** (pipe not at EOF — parent still holds a write-end) → the request thread never reaches its `finally` → the per-source `_indexing` lock + the `doc_parse_semaphore` slot leak permanently → the whole pipeline freezes. The existing `join(timeout)` only covers an ALIVE, hung child — not a DEAD child that never sent.
 
 ## Environment
-- `context_chat_backend` 5.3.0, Python 3.11, NC33 host `nc-ai`, Docker `nc_app_context_chat_backend` (network=host, uvicorn 127.0.0.1:23004), forkserver workers. Embedding via remote IONOS bge-m3.
+- `context_chat_backend` 5.3.0, Python 3.11, NC33 host `the host`, Docker `nc_app_context_chat_backend` (network=host, uvicorn 127.0.0.1:23004), forkserver workers. Embedding via remote IONOS bge-m3.
 
 ## Root cause (proven by a reproduction test, not inferred)
 A standalone test ran `exec_in_proc(target=os._exit-without-send)` against the **unpatched** code: it **HUNG >30s** (watchdog) → the recv-leak reproduced. Same test on normal/error targets passed (return value + picklable-exception propagation both work). So the leak is the dead-child-without-result `recv()` hang, confirmed.
@@ -52,8 +52,7 @@ The three freeze patches live in the container's writable layer. After ANY backe
 - **Backups (this fix):** `utils.py.ccb-bak-recv` (TRUE original, pre-any-patch this fix), `utils.py.ccb-bak-lease` (post-recv/pre-lease), `controller.py.ccb-bak-lease`. To fully revert THIS fix, restore the `.ccb-bak-recv`/`.ccb-bak-lease` originals; do NOT restore them as "the fix".
 - **Post-re-apply check:** `python3 /app/test_ccb_lease_recv.py` → 5/5 PASS; then restart; then watch ccb.log for `Currently indexing` cycling + `loadSources 200` + no 503-only-storm. Forkserver children don't log to `docker logs`; monitor via ccb.log + the pgvector `docs` count.
 
-## GLPI
-Work-ticket #34981 (context_chat umbrella). **Problem #678** (recv-leak root cause) + **Change #91** (this patch), both with requester Group "AI Team" #171 + assignee Yoan #8 + ITIL category (P→40 "Проблем > Софтуер", C→31 "Услуга > Инсталиране на софтуер"). Links: Problem↔#34981 (856), Change↔#34981 (14), Change↔Problem (7). Design/diagnostic Task #8481 (executor Yoan #8).
+##Work-ticket (context_chat umbrella). **Problem #678** (recv-leak root cause) + **** (this patch), both with requester Group "AI Team" #171 + assignee Yoan #8 + ITIL category (P→40 "Проблем > Софтуер", C→31 "Услуга > Инсталиране на софтуер"). Links: Problem↔ (856), Change↔ (14), Change↔Problem (7). Design/diagnostic Task (executor Yoan #8).
 
 ## Upstream
 Both components are general (the missing `cconn.close()` + unbounded `recv()` is a real upstream bug; a lock-lease is a standard robustness pattern). File a PR to `nextcloud/context_chat_backend` after a confirmed stability window, alongside the multipart + fork-deadlock issues.

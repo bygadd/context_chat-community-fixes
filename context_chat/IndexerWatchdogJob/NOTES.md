@@ -16,10 +16,9 @@ The chain `SchedulerJob → StorageCrawlJob → IndexerJob` is one-shot and self
 self-deletes (after the initial crawl, or on an app upgrade that doesn't re-seed it), nothing
 re-creates the IndexerJob consumer for rows already in the queue → the queue never drains and
 `last_indexed_time` stays 0 → the "initial indexing is still running" banner shows forever.
-(GLPI Incident #35096.)
 
 ## Status
-Deployed live on nc-ai (context_chat **v5.3.1**), oc_jobs row bootstrapped. **Verified autonomous:**
+Deployed live on the host (context_chat **v5.3.1**), oc_jobs row bootstrapped. **Verified autonomous:**
 cron ran the watchdog on its own → it revived **397 IndexerJobs** → the 24 596-row backlog began
 draining (24570→24306 in 2 min); IndexerJobs self-remove as their tuple empties.
 
@@ -28,7 +27,7 @@ draining (24570→24306 in 2 min); IndexerJobs self-remove as their tuple emptie
 - `main` (→ **5.4.0**) **rearchitected indexing**: the PHP `IndexerJob` + schedule-on-insert were
   removed; the completion latch moved into the Python backend (`QueueController`, backend-pull).
   So this watchdog **fixes a bug that 5.4.0 structurally eliminated** — it is moot on `main`.
-- ⇒ This is a **local 5.3.x stopgap** carried on nc-ai until the deployment upgrades to 5.4.0.
+- ⇒ This is a **local 5.3.x stopgap** carried on the host until the deployment upgrades to 5.4.0.
   It is **excluded** from the comprehensive upstream contribution. The upstream-PR candidates are
   the *other* context_chat patches (the Python backend freeze/log fixes → `context_chat_backend`;
   the SMB-seek `CachingStream` fix → `context_chat`), to be evaluated against their current `main`.
@@ -41,7 +40,7 @@ incl. `info.xml` and `IndexerWatchdogJob.php`, is replaced by the store version)
 as every other live context_chat patch. ⇒ Re-apply after any context_chat app update (until the
 5.4.0 upgrade makes it obsolete).
 
-## Re-apply runbook (after a context_chat app update, on nc-ai, while still on 5.3.x)
+## Re-apply runbook (after a context_chat app update, on the host, while still on 5.3.x)
 1. Deploy files via docker-root (www-data 33:33):
    - `lib/BackgroundJobs/IndexerWatchdogJob.php` (new)
    - re-apply: `lib/Db/QueueMapper.php` (`getQueuedStorageRootTuples()`), `lib/Service/QueueService.php`

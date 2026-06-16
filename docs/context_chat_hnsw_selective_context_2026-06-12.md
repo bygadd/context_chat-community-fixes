@@ -1,7 +1,5 @@
 # Context Chat backend — Selective Context returns 0 results (HNSW post-filter bug)
 
-GLPI #35318 · Change #107 · Project #227 (Пач 7)
-
 ## Summary
 
 When Selective Context is enabled (any provider — Mail or Files), every context_chat
@@ -10,15 +8,15 @@ who have more than ~5500 indexed chunks. Users with small corpora are unaffected
 
 ## Environment
 
-- `context_chat_backend` 5.3.0, Python 3.11, NC33 host `nc-ai`
+- `context_chat_backend` 5.3.0, Python 3.11, NC33 host `the host`
 - Docker `nc_app_context_chat_backend` (network=host, uvicorn 127.0.0.1:23004)
 - PostgreSQL 17.5 + pgvector (older build: no `hnsw.ef_search` GUC, no iterative index scan)
 - HNSW index on `langchain_pg_embedding.embedding vector(1024)` with `vector_cosine_ops`
-- Total: ~7.9M embeddings (collection `ccb_store`, uuid `cf794dd1-3595-4994-b12c-76ce8eb19b63`)
+- Total: ~7.9M embeddings (single collection, uuid `<uuid>`)
 - **`/dev/shm` = 64MB**, **`work_mem` = 4MB** — both matter for the fix (see below)
-- Largest user: **2.8M chunks** (`EE536AF8-…`, ~35% of the whole collection)
+- Largest user: **2.8M chunks** (`<user>`, ~35% of the whole collection)
 
-## Root cause (GLPI #35318)
+## Root cause
 
 `VectorDB._similarity_search` builds an ORM query:
 ```python

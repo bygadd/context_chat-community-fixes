@@ -1,6 +1,6 @@
 # context_chat — Self-heal на indexing-job веригата (дизайн-спецификация)
 
-**Дата:** 2026-06-10 · **App:** context_chat **v5.3.1** (NC 33.0.5, `nc-ai`) · **GLPI:** Incident #35096
+**Дата:** 2026-06-10 · **App:** context_chat **v5.3.1** (NC 33.0.5, `the host`) · **:** Incident
 **Статус:** дизайн ОДОБРЕН от Йоан (2026-06-10); предстои implementation plan (writing-plans).
 **Цел:** context_chat сам да възстановява (self-heal) file-indexing job-овете си при всеки upgrade, за да не „виси завинаги" банерът „initial indexing still running" и опашката да се източва — БЕЗ еднократно ръчно пре-регистриране, което се губи при следващ app update.
 
@@ -47,14 +47,14 @@ context_chat е **нормален PHP server app** (не ExApp) → `<post-migr
 
 Целта (Йоан, 2026-06-10): при **финална, изчистена от бъгове версия на context_chat** да предложим ОБОБЩЕН принос с всички разработени пачове. Инвентар:
 
-| # | Пач | Repo | Тип | Статус | GLPI |
+| # | Пач | Repo | Тип | Статус ||
 |---|---|---|---|---|---|
-| 1 | multipart-CR freeze fix | context_chat_backend | Python | LIVE (container patch) | #34981 / Change #89-93 |
-| 2 | fork-deadlock freeze fix | context_chat_backend | Python | LIVE | #34981 |
-| 3 | recv-leak / lease fix (+тест) | context_chat_backend | Python | LIVE | #34981 |
-| 4 | child-log relay (ccb.log) | context_chat_backend | Python | LIVE | #34981 |
-| 5 | SMB `fopen` non-seekable → unconditional `CachingStream` (LangRopeService) | **context_chat (PHP)** | PHP | Йоан прилага | #35096 / Change #93 |
-| 6 | **indexing-job self-heal (post-migration IRepairStep)** ← ТОЗИ | **context_chat (PHP)** | PHP | дизайн одобрен | #35096 |
+| 1 | multipart-CR freeze fix | context_chat_backend | Python | LIVE (container patch) | |
+| 2 | fork-deadlock freeze fix | context_chat_backend | Python | LIVE | |
+| 3 | recv-leak / lease fix (+тест) | context_chat_backend | Python | LIVE | |
+| 4 | child-log relay (ccb.log) | context_chat_backend | Python | LIVE | |
+| 5 | SMB `fopen` non-seekable → unconditional `CachingStream` (LangRopeService) | **context_chat (PHP)** | PHP | Йоан прилага | |
+| 6 | **indexing-job self-heal (post-migration IRepairStep)** ← ТОЗИ | **context_chat (PHP)** | PHP | дизайн одобрен | |
 
 - Реално = **2 upstream PR-а**: един към `nextcloud/context_chat` (PHP: #5, #6) и един към `nextcloud/context_chat_backend` (Python: #1-4). Worker dup-fix-ът (NC-core `nextcloud/server`) е ОТДЕЛЕН repo и вече е PR-нат от другата инстанция — не е част от този принос.
 - Всеки пач да носи: проблем, root cause, fix, тест, версия. Този doc + аналозите `context_chat_*_2026-06-*.md` са изходният материал за PR-описанията.

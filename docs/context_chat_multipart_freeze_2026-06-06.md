@@ -80,5 +80,4 @@ Verified: `multipart_400` → 0, queue draining (88265 → 88005...), docs growi
   3. `docker restart nc_app_context_chat_backend`
 - Durable option: bake the patch into a derived image, or wait for the upstream fix.
 
-## GLPI
-Work-ticket #34981 (Task: root cause + fix). Change #89 (this prod change), linked to #34981.
+##Work-ticket (Task: root cause + fix).  (this prod change), linked to.
