@@ -47,10 +47,8 @@ new = (
     "\t\t# exhaustive batched logic (full/exact results); only let an HNSW plan keep scanning past\n"
     "\t\t# the first ef_search batch so the id-filtered ORDER BY never post-filters down to 0 rows.\n"
     "\t\t# strict_order preserves exact distance order; a no-op when the planner uses the btree id\n"
-    "\t\t# index (the usual choice for the <=PG_BATCH_SIZE batches). /dev/shm=64MB on this host ->\n"
-    "\t\t# disable parallel workers to avoid a DiskFull on the per-batch sort.\n"
+    "\t\t# index (the usual choice for the <=PG_BATCH_SIZE batches).\n"
     "\t\tsession.execute(sa.text('SET LOCAL hnsw.iterative_scan = strict_order'))\n"
-    "\t\tsession.execute(sa.text('SET LOCAL max_parallel_workers_per_gather = 0'))\n"
     "\n"
     "\t\t# Initialize results list to store all potential matches\n"
 )
