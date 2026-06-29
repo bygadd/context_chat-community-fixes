@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# ⛔ SUPERSEDED / DO NOT USE (2026-06-29, #35892): this native-iterative_scan-only approach
+# REGRESSED real queries on prod. iterative_scan + hnsw.max_scan_tuples (default 20000) is
+# APPROXIMATE — for a medium/large per-user scope it only visits the global-nearest ~20000 then
+# post-filters by the id-list, so a relevant in-scope chunk outside the global top-N is MISSED
+# (a files-scoped invoice query returned "Не знам"). The exact Patch 7 CTE (apply_patch_hnsw.sh)
+# + Patch 7b (apply_patch_hnsw_postfilter.sh) were RESTORED. Kept only for provenance.
+#
 # Patch 7-native — Selective Context 0-results fix via native pgvector >=0.8 iterative_scan
 # (CCB-PATCH-iterative-scan). Applies to: nc_app_context_chat_backend (5.4.0+, pgvector >= 0.8.0).
 # File: /app/context_chat_backend/vectordb/pgvector.py
